@@ -1,0 +1,77 @@
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+
+/// Model to represent an image before & after upload
+class UploadImageModel {
+  final Uint8List? localImageToDisplay; // local preview
+  final String? uploadedUrl; // Supabase uploaded URL
+  final String bucketName; // selected bucket name
+
+  UploadImageModel({
+    this.localImageToDisplay,
+    this.uploadedUrl,
+    required this.bucketName,
+  });
+}
+
+class UploadController extends GetxController {
+  final SupabaseRepository _repository = SupabaseRepository();
+
+  /// List of images selected by user but not yet uploaded
+  var selectedImagesToUpload = <UploadImageModel>[].obs;
+
+  /// Image picker instance
+  final ImagePicker _picker = ImagePicker();
+
+  /// Pick multiple images for a specific bucket
+  Future<void> pickImages(String bucketName) async {
+    final List<XFile>? images = await _picker.pickMultiImage();
+    if (images != null) {
+      for (var image in images) {
+        final bytes = await image.readAsBytes();
+        selectedImagesToUpload.add(
+          UploadImageModel(
+            localImageToDisplay: bytes,
+            uploadedUrl: null,
+            bucketName: bucketName,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Remove image before uploading
+  void removeImage(int index) {
+    if (index >= 0 && index < selectedImagesToUpload.length) {
+      selectedImagesToUpload.removeAt(index);
+    }
+  }
+
+  /// Upload all selected images to Supabase
+  Future<void> uploadAllImages() async {
+    for (var i = 0; i < selectedImagesToUpload.length; i++) {
+      final image = selectedImagesToUpload[i];
+
+      if (image.localImageToDisplay != null) {
+        // Generate a unique file path
+        final filePath = "uploads/${DateTime.now().millisecondsSinceEpoch}.png";
+
+        // Upload to Supabase
+        final url = await _repository.uploadImage(
+          bucketName: image.bucketName,
+          filePath: filePath,
+          fileBytes: image.localImageToDisplay!,
+        );
+
+        // Update list with uploaded URL
+        selectedImagesToUpload[i] = UploadImageModel(
+          localImageToDisplay: null,
+          uploadedUrl: url,
+          bucketName: image.bucketName,
+        );
+      }
+    }
+  }
+}

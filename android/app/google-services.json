@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "672046837731",
+    "project_id": "playtube-kseries",
+    "storage_bucket": "playtube-kseries.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:672046837731:android:6aaf44ad1b97bf76c1bad6",
+        "android_client_info": {
+          "package_name": "com.example.dashboard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB90xf51Qf6ADJFoMGuzSYujcgIF0KpeCU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:672046837731:android:ff15b57120a3a98bc1bad6",
+        "android_client_info": {
+          "package_name": "com.example.playtube"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB90xf51Qf6ADJFoMGuzSYujcgIF0KpeCU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

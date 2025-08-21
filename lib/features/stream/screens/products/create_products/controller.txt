@@ -1,0 +1,83 @@
+import 'package:get/get.dart';
+
+class ProductController extends GetxController {
+  // List of variations observable for reactive UI updates
+  var variations = <Variation>[].obs;
+
+  // Add a new variation
+  void addVariation(Variation variation) {
+    variations.add(variation);
+  }
+
+  // Update a variation by index
+  void updateVariation(int index, Variation variation) {
+    if (index >= 0 && index < variations.length) {
+      variations[index] = variation;
+      variations.refresh(); // Notify observers explicitly
+    }
+  }
+
+  // Remove variation by index
+  void removeVariation(int index) {
+    if (index >= 0 && index < variations.length) {
+      variations.removeAt(index);
+    }
+  }
+
+  // Clear all variations
+  void clearVariations() {
+    variations.clear();
+  }
+
+  // Example save method - implement your own Firestore save here
+  Future<void> saveToDatabase() async {
+    try {
+      // Your saving logic here, e.g., call Firestore to save `variations`
+      // Convert variations to JSON or Map<String, dynamic> and save
+      print('Saving variations count: ${variations.length}');
+      // await firestore.collection('your_collection').add(...);
+    } catch (e) {
+      print('Failed to save: $e');
+      rethrow;
+    }
+  }
+}
+
+class Variation {
+  String imageUrl;
+  int stock;
+  double price;
+  double discountedPrice;
+  String description;
+
+  Variation({
+    required this.imageUrl,
+    required this.stock,
+    required this.price,
+    required this.discountedPrice,
+    required this.description,
+  });
+
+  // Helper method to clone and update fields (immutable style)
+  Variation copyWith({
+    String? imageUrl,
+    int? stock,
+    double? price,
+    double? discountedPrice,
+    String? description,
+  }) {
+    return Variation(
+      imageUrl: imageUrl ?? this.imageUrl,
+      stock: stock ?? this.stock,
+      price: price ?? this.price,
+      discountedPrice: discountedPrice ?? this.discountedPrice,
+      description: description ?? this.description,
+    );
+  }
+
+  // For debugging/logging, override toString
+  @override
+  String toString() {
+    return 'Variation(imageUrl: $imageUrl, stock: $stock, price: $price, discountedPrice: $discountedPrice, description: $description)';
+  }
+}

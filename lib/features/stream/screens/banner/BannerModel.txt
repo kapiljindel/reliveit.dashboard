@@ -1,0 +1,42 @@
+class BannerModel {
+  final String imageUrl;
+  final String targetScreen;
+  final bool active;
+
+  BannerModel({
+    required this.imageUrl,
+    required this.targetScreen,
+    required this.active,
+  });
+
+  /// Convert a JSON object into a BannerModel
+  factory BannerModel.fromJson(Map<String, dynamic> json) {
+    return BannerModel(
+      imageUrl: json['imageUrl'] ?? '',
+      targetScreen: json['targetScreen'] ?? '',
+      active: json['active'] ?? false,
+    );
+  }
+
+  /// Convert this BannerModel into a JSON object
+  Map<String, dynamic> toJson() {
+    return {
+      'imageUrl': imageUrl,
+      'targetScreen': targetScreen,
+      'active': active,
+    };
+  }
+
+  /// Clone with new values
+  BannerModel copyWith({String? imageUrl, String? targetScreen, bool? active}) {
+    return BannerModel(
+      imageUrl: imageUrl ?? this.imageUrl,
+      targetScreen: targetScreen ?? this.targetScreen,
+      active: active ?? this.active,
+    );
+  }
+
+  @override
+  String toString() =>
+      'BannerModel(imageUrl: $imageUrl, targetScreen: $targetScreen, active: $active)';
+}
