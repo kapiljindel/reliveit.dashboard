@@ -72,7 +72,7 @@ class ImageModel {
         id: document.id,
         url: data['url'] ?? '',
         folder: data['folder'] ?? '',
-        sizeBytes: data['sizeBytes'],
+        sizeBytes: data['sizeBytes'] ?? 0,
         filename: data['filename'] ?? '',
         fullPath: data['fullPath'],
         createdAt:
