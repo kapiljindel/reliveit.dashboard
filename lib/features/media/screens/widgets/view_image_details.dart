@@ -1,6 +1,7 @@
 import 'package:clipboard/clipboard.dart';
 import 'package:dashboard/common/widgets/containers/rounded_container.dart';
 import 'package:dashboard/common/widgets/images/t_rounded_image.dart';
+import 'package:dashboard/features/media/controllers/media_controller.dart';
 import 'package:dashboard/features/media/models/image_model.dart';
 import 'package:dashboard/utils/constants/colors.dart';
 import 'package:dashboard/utils/constants/enums.dart';
@@ -134,9 +135,9 @@ class ImagePopup extends StatelessWidget {
                   SizedBox(
                     width: 300,
                     child: TextButton(
-                      onPressed: () {
-                        // TODO: Implement delete logic here.
-                      },
+                      onPressed:
+                          () => MediaController.instance
+                              .removeCloudImageConfirmation(image),
                       child: const Text(
                         'Delete Image',
                         style: TextStyle(color: Colors.red),

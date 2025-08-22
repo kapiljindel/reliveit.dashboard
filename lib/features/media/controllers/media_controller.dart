@@ -1,11 +1,16 @@
 // ignore_for_file: unused_local_variable
 
 import 'dart:typed_data';
+import 'package:dashboard/common/widgets/loaders/circular_loader.dart';
+import 'package:dashboard/features/media/screens/widgets/media_content.dart';
+import 'package:dashboard/features/media/screens/widgets/media_uploader.dart';
 import 'package:dashboard/repository/media.dart';
+import 'package:dashboard/utils/constants/colors.dart';
 import 'package:dashboard/utils/constants/image_strings.dart';
 import 'package:dashboard/utils/constants/sizes.dart';
 import 'package:dashboard/utils/constants/text_strings.dart';
 import 'package:dashboard/utils/popups/dialogs.dart';
+import 'package:dashboard/utils/popups/full_screen_loader.dart';
 import 'package:dashboard/utils/popups/loaders.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -112,7 +117,7 @@ class MediaController extends GetxController {
     }
   }
 
-  /// Select and load images using Dropzone
+  /*  /// Select and load images using Dropzone
   Future<void> selectLocalImages() async {
     final files = await dropzoneController.pickFiles(
       multiple: true,
@@ -135,6 +140,46 @@ class MediaController extends GetxController {
           selectedImagesToUpload.add(image);
         }
       }
+    }
+  }
+*/
+  Future<void> selectLocalImages() async {
+    final files = await dropzoneController.pickFiles(
+      multiple: true,
+      mime: ['image/jpeg', 'image/png'],
+    );
+
+    if (files.isNotEmpty) {
+      print('✅ Image(s) selected from device');
+
+      for (var file in files) {
+        final fileName = file.name.toLowerCase();
+
+        // Extension check
+        if (!(fileName.endsWith('.png') ||
+            fileName.endsWith('.jpg') ||
+            fileName.endsWith('.jpeg'))) {
+          print('⚠️ Rejected file (unsupported type): ${file.name}');
+          continue; // Skip this file
+        }
+
+        print('📁 File received: ${file.name}');
+        final bytes = await dropzoneController.getFileData(file);
+        print('📥 Bytes loaded for: ${file.name}, size: ${bytes.length} bytes');
+
+        final image = ImageModel(
+          url: '',
+          folder: '',
+          filename: file.name,
+          localImageToDisplay: Uint8List.fromList(bytes),
+        );
+
+        print('📦 ImageModel created for: ${file.name}');
+        selectedImagesToUpload.add(image);
+        print('➕ Image added to list: ${file.name}');
+      }
+    } else {
+      print('❌ No images selected from device.');
     }
   }
 
@@ -247,5 +292,114 @@ class MediaController extends GetxController {
         path = TTexts.othersStoragePath;
     }
     return path;
+  }
+
+  /// Popup Confirmation to remove cloud image
+  void removeCloudImageConfirmation(ImageModel image) {
+    // Delete Confirmation
+    TDialogs.defaultDialog(
+      context: Get.context!,
+      content: 'Are you sure you want to delete this image?',
+      onConfirm: () async {
+        Get.back(); // Close dialog after deletion
+
+        removeCloudImage(image);
+      },
+    );
+  }
+
+  void removeCloudImage(ImageModel image) async {
+    try {
+      // Close the removeCloudImageConfirmation() Dialog
+      Get.back();
+
+      // Show Loader
+      Get.defaultDialog(
+        title: '',
+        barrierDismissible: false,
+        backgroundColor: Colors.transparent,
+        content: const PopScope(
+          canPop: false,
+          child: SizedBox(width: 150, height: 150, child: TCircularLoader()),
+        ),
+      );
+
+      // Delete Image
+      await mediaRepository.deleteFileFromStorage(image);
+
+      // Get the corresponding list to update
+      RxList<ImageModel> targetList;
+
+      // Check the selected category and update the corresponding list
+      switch (selectedPath.value) {
+        case MediaCategory.banners:
+          targetList = allBannerImages;
+          break;
+        case MediaCategory.brands:
+          targetList = allBrandImages;
+          break;
+        case MediaCategory.categories:
+          targetList = allCategoryImages;
+          break;
+        case MediaCategory.products:
+          targetList = allProductImages;
+          break;
+        case MediaCategory.users:
+          targetList = allUserImages;
+          break;
+        default:
+          return;
+      }
+
+      /// Revove image
+
+      targetList.remove(image);
+      update();
+
+      TFullScreenLoader.stopLoading();
+      TLoaders.successSnackBar(
+        title: 'Image Deleted',
+        message: 'Image successfully deleted from your cloud storage',
+      );
+    } catch (e) {
+      TFullScreenLoader.stopLoading();
+      TLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
+    }
+  }
+
+  // Images Selection Bottom Sheet
+  Future<List<ImageModel>?> selectImagesFromMedia({
+    List<String>? selectedUrls,
+    bool allowSelection = true,
+    bool multipleSelection = false,
+  }) async {
+    showImagesUploaderSection.value = true;
+
+    List<ImageModel>? selectedImages = await Get.bottomSheet<List<ImageModel>>(
+      isScrollControlled: true,
+      backgroundColor: TColors.primaryBackground,
+      FractionallySizedBox(
+        heightFactor: 1,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(TSizes.defaultSpace),
+            child: Column(
+              children: [
+                const MediaUploader(),
+                MediaContent(
+                  allowSelection: allowSelection,
+                  alreadySelectedUrls: selectedUrls ?? [],
+                  allowMultipleSelection: multipleSelection,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    //  showImagesUploaderSection.value = false;
+
+    return selectedImages;
   }
 }
